@@ -1,0 +1,1 @@
+package pihole_exporter
