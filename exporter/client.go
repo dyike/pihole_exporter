@@ -1,4 +1,4 @@
-package pihole_exporter
+package exporter
 
 import (
 	"bytes"
@@ -6,32 +6,40 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
-
-	"pihole_exporter/metrics"
+	"time"
 )
 
 var (
-	statsUrl = "http://%s/admin/api.php?summaryRaw&overTimeData&topItems&recentItems&getQueryTypes&getForwardDestinations&getQuerySources&jsonForceObject"
+	statsUrl = "http://%s/admin/api.php?summaryRaw&overTimeData&topItems&recentItems&getQueryTypes&getForwardDestinations&getQuerySources&jsonForceObject&auth=%s"
 )
 
 type Client struct {
-	EndPoint string
+	hostname string
+	token    string
+	interval int
 }
 
-func NewClient(endpoint string) (*Client, error) {
-	url, err := url.Parse(endpoint)
-	if err != nil {
-		return nil, err
-	}
+func NewClient(endpoint string, token string, interval int) *Client {
 
 	return &Client{
-		EndPoint: url.String(),
-	}, nil
+		hostname: endpoint,
+		token:    token,
+		interval: interval,
+	}
+}
+
+func (c *Client) Collect() {
+	for range time.Tick(time.Duration(c.interval)) {
+		stats, err := c.GetStats()
+		if err != nil {
+			continue
+		}
+		c.GetMetrics(stats)
+	}
 }
 
 func (c *Client) GetStats() (*Stats, error) {
-	resp, err := htt.Get(fmt.Sprintf(statsUrl, c.EndPoint))
+	resp, err := http.Get(fmt.Sprintf(statsUrl, c.hostname, c.token))
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +74,7 @@ func (c *Client) GetMetrics(stats *Stats) {
 	Reply.WithLabelValues(c.hostname, "ip").Set(float64(stats.ReplyIP))
 
 	var isEnabled int = 0
-	if stats.Status == enabledStatus {
+	if stats.Status == "enable" {
 		isEnabled = 1
 	}
 	Status.WithLabelValues(c.hostname).Set(float64(isEnabled))

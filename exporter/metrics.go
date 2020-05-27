@@ -1,4 +1,4 @@
-package pihole_exporter
+package exporter
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
@@ -176,26 +176,26 @@ var (
 	)
 )
 
-func initMetric(name string, metric *prometheus.GaugeVec) {
+func initMetrics(name string, metric *prometheus.GaugeVec) {
 	prometheus.MustRegister(metric)
 }
 
-func Init() {
-	initMetric("domains_blocked", DomainsBlocked)
-	initMetric("dns_queries_today", DNSQueriesToday)
-	initMetric("ads_blocked_today", AdsBlockedToday)
-	initMetric("ads_percentag_today", AdsPercentageToday)
-	initMetric("unique_domains", UniqueDomains)
-	initMetric("queries_forwarded", QueriesForwarded)
-	initMetric("queries_cached", QueriesCached)
-	initMetric("clients_ever_seen", ClientsEverSeen)
-	initMetric("unique_clients", UniqueClients)
-	initMetric("dns_queries_all_types", DNSQueriesAllTypes)
-	initMetric("reply", Reply)
-	initMetric("top_queries", TopQueries)
-	initMetric("top_ads", TopAds)
-	initMetric("top_sources", TopSources)
-	initMetric("forward_destinations", ForwardDestinations)
-	initMetric("querytypes", QueryTypes)
-	initMetric("status", Status)
+func InitMetrics() {
+	initMetrics("domains_blocked", DomainsBlocked)
+	initMetrics("dns_queries_today", DNSQueriesToday)
+	initMetrics("ads_blocked_today", AdsBlockedToday)
+	initMetrics("ads_percentag_today", AdsPercentageToday)
+	initMetrics("unique_domains", UniqueDomains)
+	initMetrics("queries_forwarded", QueriesForwarded)
+	initMetrics("queries_cached", QueriesCached)
+	initMetrics("clients_ever_seen", ClientsEverSeen)
+	initMetrics("unique_clients", UniqueClients)
+	initMetrics("dns_queries_all_types", DNSQueriesAllTypes)
+	initMetrics("reply", Reply)
+	initMetrics("top_queries", TopQueries)
+	initMetrics("top_ads", TopAds)
+	initMetrics("top_sources", TopSources)
+	initMetrics("forward_destinations", ForwardDestinations)
+	initMetrics("querytypes", QueryTypes)
+	initMetrics("status", Status)
 }

@@ -7,23 +7,26 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 	"time"
 
-	"github.com/gofiber/fiber"
+	"pihole_exporter/exporter"
+
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	logrus "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
 type Opt struct {
-	LogDir     string `yaml:"log_dir"`
-	LogName    string `yaml:"log_name"`
-	LogLevel   string `yaml:"log_level"`
-	Addr       string `yaml:"addr"`
-	Port       int    `yaml:"port"`
-	PiHoleHost string `yaml:"pihole_host"`
+	LogDir         string `yaml:"log_dir"`
+	LogName        string `yaml:"log_name"`
+	LogLevel       string `yaml:"log_level"`
+	Port           string `yaml:"port"`
+	PiHoleInterval int    `yaml:"pihole_interval"`
+	PiHoleHost     string `yaml:"pihole_host"`
+	PiHoleToken    string `yaml:"pihole_token"`
 }
 
 var (
@@ -74,13 +77,26 @@ func init() {
 	}
 }
 
+var s *exporter.Server
+
 func main() {
 	logger = setupLogger()
-	app := fiber.New()
 
-	app.Get("/metrics", func(c *fiber.Ctx) {
-		promhttp.Handler()
-	})
+	exporter.InitMetrics()
 
-	app.Listen(Options.Port)
+	// init client
+	client := exporter.NewClient(Options.PiHoleHost, Options.PiHoleToken, Options.PiHoleInterval)
+	go client.Collect()
+
+	// init http server
+	s = exporter.NewServer("9510")
+	go s.ListenAndServe()
+
+	// handle exit signal
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	<-stop
+
+	s.Stop()
 }

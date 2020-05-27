@@ -1,4 +1,4 @@
-package pihole_exporter
+package exporter
 
 type Stats struct {
 	DomainsBeingBlocked int                `json:"domains_being_blocked"`

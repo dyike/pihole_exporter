@@ -1,0 +1,7 @@
+log_dir: .
+log_name: pihole_exporter.log
+log_level: info
+port: "9510"
+pihole_interval: 60
+pihole_host: "192.168.31.5"
+pihole_token: "d1bdb1e1d796bc7b125ba3b32040d4a3402c7623a8941e5129ba3f29f6715919"

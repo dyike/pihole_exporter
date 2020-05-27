@@ -1,1 +1,2 @@
 pihole_exporter
+*.log*
